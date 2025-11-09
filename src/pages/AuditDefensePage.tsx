@@ -1,13 +1,10 @@
-// ============================================
-// AuditDefense.tsx - Premium Audit Defense Service Page
-// ============================================
 
 import { useEffect } from 'react';
 import Header from '@/components/Header';
 
 const AuditDefensePage = () => {
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo(0, 0);
   }, []);
 
   const benefits = [

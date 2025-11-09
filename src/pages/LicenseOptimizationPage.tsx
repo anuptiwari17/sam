@@ -7,7 +7,7 @@ import Header from '@/components/Header';
 
 const LicenseOptimizationPage = () => {
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo(0, 0);
   }, []);
 
   const optimizations = [

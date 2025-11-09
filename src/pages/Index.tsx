@@ -17,21 +17,7 @@ const Index = () => {
         "Simplify EA, CSP, and SPLA management."
       ],
       tags: ["M365", "AZURE", "OPTIMIZATION"],
-      backgroundColor: "hsl(16, 100%, 50%)", // Orange
-      textColor: "text-white",
-      image: "/logo.png"
-    },
-    {
-      title: "Adobe",
-      subtitle: "Get More from Your Adobe Investment",
-      description: [
-        "Identify and reclaim unused or duplicate Adobe users.",
-        "Optimize Creative Cloud and Acrobat assignments.",
-        "Centralize control via the Adobe Admin Console.",
-        "Streamline renewals to prevent over-purchasing."
-      ],
-      tags: ["CREATIVE CLOUD", "ACROBAT", "OPTIMIZATION"],
-      backgroundColor: "hsl(48, 100%, 67%)", // Yellow
+      backgroundColor: "hsl(48, 100%, 67%)",        //"hsl(16, 100%, 50%)", // Orange
       textColor: "text-black",
       image: "/logo.png"
     },
@@ -50,6 +36,21 @@ const Index = () => {
       image: "/logo.png"
     },
     {
+      title: "Adobe",
+      subtitle: "Get More from Your Adobe Investment",
+      description: [
+        "Identify and reclaim unused or duplicate Adobe users.",
+        "Optimize Creative Cloud and Acrobat assignments.",
+        "Centralize control via the Adobe Admin Console.",
+        "Streamline renewals to prevent over-purchasing."
+      ],
+      tags: ["CREATIVE CLOUD", "ACROBAT", "OPTIMIZATION"],
+      backgroundColor: "orange",
+      textColor: "text-black",
+      image: "/logo.png"
+    },
+    
+    {
       title: "Oracle",
       subtitle: "Simplify, Save, and Scale Your Oracle",
       description: [
@@ -59,7 +60,7 @@ const Index = () => {
         "Align support renewals with actual usage."
       ],
       tags: ["DATABASE", "LMS AUDIT", "NUP"],
-      backgroundColor: "hsl(330, 81%, 60%)", // Magenta
+      backgroundColor: "hsla(359, 82%, 53%, 1.00)", // Magenta
       textColor: "text-white",
       image: "/logo.png"
     }

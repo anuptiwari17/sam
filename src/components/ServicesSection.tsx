@@ -5,24 +5,13 @@ import { Link } from "react-router-dom";
 
 gsap.registerPlugin(ScrollTrigger);
 
-interface Service {
-  title: string;
-  description: string;
-  image: string;
-  buttonText: string;
-  buttonHref: string;
-  route: string;
-  features: string[];
-  tagline: string;
-}
-
-const services: Service[] = [
+const services = [
   {
     title: "Audit Defense",
-    description: "Worried about an upcoming software audit or want to be audit ready? We help you take control before vendors do. Our audit defense services protect your business from unnecessary risks and penalties.",
+    subtitle: "Worried about an upcoming software audit or want to be audit ready?",
+    description: "We help you take control before vendors do. Our audit defense services protect your business from unnecessary risks and penalties.",
     image: "/logo.png",
     buttonText: "Explore Audit Defense",
-    buttonHref: "#audit-defense",
     features: [
       "Identify compliance gaps before auditors do",
       "Validate and prepare data for accuracy",
@@ -34,10 +23,10 @@ const services: Service[] = [
   },
   {
     title: "Software Managed Services",
-    description: "Is managing software compliance taking too much time? Let us handle it for you. Our managed services give you ongoing control and visibility across your entire software estate.",
+    subtitle: "Is managing software compliance taking too much time?",
+    description: "Let us handle it for you. Our managed services give you ongoing control and visibility across your entire software estate.",
     image: "/logo.png",
     buttonText: "Explore Managed Services",
-    buttonHref: "#managed-services",
     features: [
       "Continuous license and entitlement tracking",
       "Automated compliance monitoring",
@@ -49,10 +38,10 @@ const services: Service[] = [
   },
   {
     title: "Software License Optimization",
-    description: "Are you paying for software you don't fully use? Most organizations do. We help you optimize licenses, usage, and renewals to unlock hidden savings.",
+    subtitle: "Are you paying for software you don't fully use?",
+    description: "Most organizations do. We help you optimize licenses, usage, and renewals to unlock hidden savings.",
     image: "/logo.png",
     buttonText: "Explore Optimization",
-    buttonHref: "#license-optimization",
     features: [
       "Analyze actual usage vs. entitlements",
       "Reclaim and reassign underused licenses",
@@ -60,222 +49,214 @@ const services: Service[] = [
       "Unlock measurable cost savings without productivity loss"
     ],
     tagline: "Spend less, achieve more — through smarter license management.",
-    route: "/services/license-optimization"  
+    route: "/services/license-optimization"
   },
 ];
 
 const ServicesSection = () => {
-  const sectionRef = useRef<HTMLDivElement>(null);
-  const heroTitleRef = useRef<HTMLDivElement>(null);
-  const heroSubtitleRef = useRef<HTMLDivElement>(null);
-  const heroButtonRef = useRef<HTMLButtonElement>(null);
-  const mainImageRef = useRef<HTMLDivElement>(null);
-  const scrollIndicatorRef = useRef<HTMLDivElement>(null);
-  
-  const contentRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const bgImageRefs = useRef<(HTMLDivElement | null)[]>([]);
-  
+  const sectionRef = useRef(null);
+  const headerRef = useRef(null);
+  const imageRef = useRef(null);
+  const contentRefs = useRef([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) return;
+
     const section = sectionRef.current;
     if (!section) return;
 
     const ctx = gsap.context(() => {
-      // Initial setup - all services hidden except positioning
-      contentRefs.current.forEach((content) => {
-        gsap.set(content, { opacity: 0, x: -80 });
-      });
+      gsap.set(contentRefs.current, { opacity: 0, x: -60 });
       
-      // Set initial positions for background images - visible in background
-      gsap.set(bgImageRefs.current[0], { 
-        opacity: 0.2, 
-        x: "60%", 
-        scale: 0.6,
-        zIndex: 1
-      });
-      gsap.set(bgImageRefs.current[1], { 
-        opacity: 0.15, 
-        x: "80%", 
-        scale: 0.5,
-        zIndex: 0
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          start: "top top",
+          end: "+=350%",
+          pin: true,
+          scrub: 1.2,
+          anticipatePin: 1,
+        },
       });
 
-      // Responsive values
-      const mm = gsap.matchMedia();
+      // Phase 1: Fade out header, move and enlarge image to right
+      tl.to(headerRef.current, {
+        opacity: 0,
+        y: -40,
+        duration: 1.2,
+        ease: "power2.inOut"
+      })
+      .to(imageRef.current, {
+        left: "73%",
+        top: "50%",
+        scale: 1,
+        width: "38vw",
+        height: "68vh",
+        duration: 2,
+        ease: "power3.inOut",
+        onStart: () => setCurrentIndex(0)
+      }, "-=0.6")
+      .to(contentRefs.current[0], {
+        opacity: 1,
+        x: 0,
+        duration: 1.5,
+        ease: "power2.out"
+      }, "-=1.2");
 
-      mm.add({
-        // Mobile
-        isMobile: "(max-width: 767px)",
-        // Tablet
-        isTablet: "(min-width: 768px) and (max-width: 1023px)",
-        // Desktop
-        isDesktop: "(min-width: 1024px)"
-      }, (context) => {
-        const { isMobile, isTablet } = context.conditions as { isMobile: boolean; isTablet: boolean; isDesktop: boolean };
+      // Hold first service
+      tl.to({}, { duration: 1.5 });
 
-        const imageRightPosition = isMobile ? "15%" : isTablet ? "20%" : "25%";
-        const imageWidth = isMobile ? "70vw" : isTablet ? "50vw" : "38vw";
-        const imageHeight = isMobile ? "50vh" : isTablet ? "55vh" : "65vh";
+      // Phase 2: Transition to second service
+      tl.to(contentRefs.current[0], {
+        opacity: 0,
+        x: -60,
+        duration: 1,
+        ease: "power2.in"
+      })
+      .to(imageRef.current, {
+        opacity: 0,
+        scale: 0.95,
+        duration: 0.6,
+        ease: "power2.inOut",
+        onComplete: () => {
+          setCurrentIndex(1);
+        }
+      }, "<")
+      .to(imageRef.current, {
+        opacity: 1,
+        scale: 1,
+        duration: 0.6,
+        ease: "power2.inOut"
+      })
+      .to(contentRefs.current[1], {
+        opacity: 1,
+        x: 0,
+        duration: 1.5,
+        ease: "power2.out"
+      }, "-=0.8");
 
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: section,
-            start: "top top",
-            end: "+=450%",
-            pin: true,
-            scrub: 1.5,
-            anticipatePin: 1,
-            onUpdate: (self) => {
-              const progress = self.progress;
-              if (progress < 0.3) {
-                setCurrentIndex(0);
-              } else if (progress < 0.65) {
-                setCurrentIndex(1);
-              } else {
-                setCurrentIndex(2);
-              }
-            },
-          },
-        });
+      // Hold second service
+      tl.to({}, { duration: 1.5 });
 
-        // Phase 1: Hero state - fade out title, subtitle, button
-        tl.to(heroTitleRef.current, {
-          opacity: 0,
-          y: -50,
-          duration: 1.5,
-          ease: "power2.inOut",
-        })
-        .to(heroSubtitleRef.current, {
-          opacity: 0,
-          y: -30,
-          duration: 1.5,
-          ease: "power2.inOut",
-        }, "<0.15")
-        .to(heroButtonRef.current, {
-          opacity: 0,
-          y: -30,
-          duration: 1.5,
-          ease: "power2.inOut",
-        }, "<0.15")
-        .to(scrollIndicatorRef.current, {
-          opacity: 0,
-          duration: 0.8,
-          ease: "power2.inOut",
-        }, "<0.2")
-        // Fade out background images
-        .to([bgImageRefs.current[0], bgImageRefs.current[1]], {
-          opacity: 0,
-          duration: 1.2,
-          ease: "power2.inOut",
-        }, "<0.3");
+      // Phase 3: Transition to third service
+      tl.to(contentRefs.current[1], {
+        opacity: 0,
+        x: -60,
+        duration: 1,
+        ease: "power2.in"
+      })
+      .to(imageRef.current, {
+        opacity: 0,
+        scale: 0.95,
+        duration: 0.6,
+        ease: "power2.inOut",
+        onComplete: () => {
+          setCurrentIndex(2);
+        }
+      }, "<")
+      .to(imageRef.current, {
+        opacity: 1,
+        scale: 1,
+        duration: 0.6,
+        ease: "power2.inOut"
+      })
+      .to(contentRefs.current[2], {
+        opacity: 1,
+        x: 0,
+        duration: 1.5,
+        ease: "power2.out"
+      }, "-=0.8");
 
-        // Phase 2: Main image moves to right and becomes full, first service content appears
-        tl.to(mainImageRef.current, {
-          x: imageRightPosition,
-          y: isMobile ? "-5vh" : "-10vh",
-          width: imageWidth,
-          height: imageHeight,
-          duration: 2,
-          ease: "power3.out",
-        }, "<0.5")
-        .to(contentRefs.current[0], {
-          opacity: 1,
-          x: 0,
-          duration: 1.8,
-          ease: "power3.out",
-        }, "<0.6")
-        .to({}, { duration: 1.5 }); // Hold first service
-
-        // Phase 3: Transition to second service - swap image
-        tl.to(contentRefs.current[0], {
-          opacity: 0,
-          x: -80,
-          duration: 1.5,
-          ease: "power3.in",
-        })
-        .to(mainImageRef.current, {
-          opacity: 0,
-          scale: 0.95,
-          duration: 1.2,
-          ease: "power3.in",
-        }, "<")
-        .call(() => {
-          const mainImg = mainImageRef.current;
-          if (mainImg) {
-            const img = mainImg.querySelector('img');
-            if (img) img.src = services[1].image;
-          }
-        })
-        .to(mainImageRef.current, {
-          opacity: 1,
-          scale: 1,
-          duration: 1.5,
-          ease: "power3.out",
-        }, "<0.5")
-        .to(contentRefs.current[1], {
-          opacity: 1,
-          x: 0,
-          duration: 1.8,
-          ease: "power3.out",
-        }, "<0.3")
-        .to({}, { duration: 1.5 }); // Hold second service
-
-        // Phase 4: Transition to third service - swap image
-        tl.to(contentRefs.current[1], {
-          opacity: 0,
-          x: -80,
-          duration: 1.5,
-          ease: "power3.in",
-        })
-        .to(mainImageRef.current, {
-          opacity: 0,
-          scale: 0.95,
-          duration: 1.2,
-          ease: "power3.in",
-        }, "<")
-        .call(() => {
-          const mainImg = mainImageRef.current;
-          if (mainImg) {
-            const img = mainImg.querySelector('img');
-            if (img) img.src = services[2].image;
-          }
-        })
-        .to(mainImageRef.current, {
-          opacity: 1,
-          scale: 1,
-          duration: 1.5,
-          ease: "power3.out",
-        }, "<0.5")
-        .to(contentRefs.current[2], {
-          opacity: 1,
-          x: 0,
-          duration: 1.8,
-          ease: "power3.out",
-        }, "<0.3")
-        .to({}, { duration: 2 }); // Final hold
-
-        return () => {}; // Cleanup function for matchMedia
-      });
+      // Final hold
+      tl.to({}, { duration: 1.5 });
 
     }, section);
 
     return () => ctx.revert();
-  }, []);
+  }, [isMobile]);
 
+  // Mobile version
+  if (isMobile) {
+    return (
+      <section className="w-full bg-[#0a0e1a] py-16 px-4" style={{zIndex: 10}}>
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-light tracking-tight text-white mb-2">
+            Our Services
+          </h2>
+          <p className="text-sm text-gray-400">
+            Explore our services
+          </p>
+        </div>
+
+        
+        <div className="space-y-6">
+          {services.map((service, i) => (
+            <div key={i} className="bg-gradient-to-br from-[#0f1629] to-[#0a0e1a] rounded-2xl overflow-hidden border border-white/10">
+              <div className="h-56 overflow-hidden bg-[#0d1520] flex items-center justify-center p-8 ">
+                <img
+                  src={service.image}
+                  alt={service.title}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div className="p-6">
+                <h3 className="text-xl font-light text-white mb-2">
+                  {service.title}
+                </h3>
+                <p className="text-xs text-gray-400 mb-3 italic">
+                  {service.subtitle}
+                </p>
+                <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+                  {service.description}
+                </p>
+                <ul className="space-y-2 mb-4">
+                  {service.features.map((feature, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-xs text-gray-400">
+                      <span className="text-blue-400 mt-1">•</span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-sm text-blue-300 font-medium mb-5 italic">
+                  {service.tagline}
+                </p>
+                <Link className="w-full px-6 py-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-sm font-medium text-white hover:bg-white/20 transition-all"
+                  to={service.route}>
+                  {service.buttonText}
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  }
+
+  // Desktop version
   return (
     <section
       ref={sectionRef}
-      className="relative h-screen w-full bg-[#0d1520] overflow-hidden"
-      style={{zIndex:10}}
+      className="relative h-screen w-full bg-[#0a0e1a] overflow-hidden"
+      style={{ zIndex: 10 }}
     >
-      {/* Starry background effect */}
-      <div className="absolute inset-0 bg-gradient-radial from-blue-900/5 via-transparent to-transparent" />
+      {/* Subtle background effect */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-950/20 via-transparent to-purple-950/20" />
+      
+      {/* Subtle stars */}
       <div className="absolute inset-0 opacity-30">
-        {[...Array(50)].map((_, i) => (
+        {[...Array(60)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-1 h-1 bg-white rounded-full"
+            className="absolute w-px h-px bg-white rounded-full"
             style={{
               top: `${Math.random() * 100}%`,
               left: `${Math.random() * 100}%`,
@@ -285,149 +266,88 @@ const ServicesSection = () => {
         ))}
       </div>
 
-      {/* Hero Section - Initial State */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center px-4 
-                -translate-y-6 sm:-translate-y-8 md:-translate-y-12 lg:-translate-y-16 xl:-translate-y-16">
-  {/* Title */}
-  <div ref={heroTitleRef} className="text-center mb-3 sm:mb-4">
-    <p className="text-[0.6rem] sm:text-xs md:text-sm tracking-[0.3em] text-gray-400 mb-1 sm:mb-2 uppercase">
-      Discover
-    </p>
-    <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-light tracking-tight text-white">
-      OUR SERVICES
-    </h2>
-        </div>
-
-        {/* Subtitle */}
-        <p
-          ref={heroSubtitleRef}
-          className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-400 mb-6 sm:mb-8 text-center max-w-xs sm:max-w-md md:max-w-2xl px-4"
-        >
-          Comprehensive enterprise solutions designed to transform your business operations
-        </p>
-
-        {/* Button */}
-        <button
-          ref={heroButtonRef}
-          className="px-6 sm:px-8 py-2 sm:py-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-xs sm:text-sm font-medium text-white hover:bg-white/20 hover:border-white/30 transition-all duration-300 hover:scale-105"
-        >
-          GET STARTED
-        </button>
-
-        {/* Main Image - Cropped at bottom center, will move to right */}
-        <div
-          ref={mainImageRef}
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[85vw] sm:w-[75vw] md:w-[65vw] lg:w-[55vw] rounded-t-2xl sm:rounded-t-3xl overflow-hidden"
-          style={{ height: '40vh' }}
-        >
-          <div className="relative w-full h-full">
-            <img
-              src={services[0].image}
-              alt="Service Preview"
-              className="w-full h-full object-contain object-center"
-            />
-            
-            {/* Glass Border */}
-            <div className="absolute inset-0 rounded-t-2xl sm:rounded-t-3xl border-t border-x border-white/10" />
-          </div>
-        </div>
-
-        {/* Background Images - Initial decorative state (hidden on mobile) */}
-        <div className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 w-[40vw] h-[50vh]">
-          <div
-            ref={(el) => (bgImageRefs.current[0] = el)}
-            className="absolute w-full h-full rounded-3xl overflow-hidden"
-          >
-            <img
-              src={services[1].image}
-              alt="Background"
-              className="w-full h-full object-contain"
-            />
-            <div className="absolute inset-0 rounded-3xl border border-white/10" />
-          </div>
-        </div>
-
-        <div className="hidden lg:block absolute right-0 top-1/2 -translate-y-1/2 w-[35vw] h-[45vh]">
-          <div
-            ref={(el) => (bgImageRefs.current[1] = el)}
-            className="absolute w-full h-full rounded-3xl overflow-hidden"
-          >
-            <img
-              src={services[2].image}
-              alt="Background"
-              className="w-full h-full object-contain"
-            />
-            <div className="absolute inset-0 rounded-3xl border border-white/10" />
-          </div>
-        </div>
-
-        {/* Scroll Indicator */}
-        <div
-          ref={scrollIndicatorRef}
-          className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/60"
-        >
-          <svg
-            className="w-5 h-5 sm:w-6 sm:h-6 animate-bounce"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 14l-7 7m0 0l-7-7m7 7V3"
-            />
-          </svg>
+      {/* Header - Initial centered state */}
+      <div
+        ref={headerRef}
+        className="absolute top-[15%] left-1/2 -translate-x-1/2 text-center z-20"
+      >
+        <h2 className="text-6xl xl:text-7xl font-light tracking-tight text-white mb-3">
+          Our Services
+        </h2>
+        <div className="flex items-center justify-center gap-3">
+          <div className="h-px w-12 bg-gradient-to-r from-transparent to-white/40" />
+          <p className="text-sm text-gray-400 tracking-wide">
+            Explore our services
+          </p>
+          <div className="h-px w-12 bg-gradient-to-l from-transparent to-white/40" />
         </div>
       </div>
 
-      {/* Service Content - Left Side */}
-      <div className="absolute left-0 top-0 w-full md:w-[55%] lg:w-[50%] h-full flex items-center justify-center px-4 sm:px-6 md:px-8 lg:px-12 xl:px-20">
+      {/* Image - Starts center, zoomed out */}
+      <div
+        ref={imageRef}
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[35vw] h-[50vh] z-10 mt-8"
+        style={{ scale: 0.7, willChange: 'transform, left, top, width, height' }}
+      >
+        <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl bg-[#0d1520] flex items-center justify-center p-12">
+          <img
+            src={services[0].image}
+            alt="Service"
+            className="w-full h-full object-contain"
+          />
+          <div className="absolute inset-0 rounded-3xl border border-white/20" />
+        </div>
+      </div>
+
+      {/* Content - Left side */}
+      <div className="absolute left-[6%] top-[20%] -translate-y-1/2 w-[44%] z-20">
         {services.map((service, i) => (
           <div
-            key={`content-${i}`}
+            key={i}
             ref={(el) => (contentRefs.current[i] = el)}
-            className="absolute w-full max-w-xl"
-            style={{ 
-              transform: 'translateY(-12vh)',
-              pointerEvents: currentIndex === i ? 'auto' : 'none'
-            }}
+            className="absolute w-full"
+            style={{ pointerEvents: currentIndex === i ? 'auto' : 'none' }}
           >
-            <h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-light tracking-tight text-white mb-3 sm:mb-4 md:mb-6 leading-tight">
-              {service.title}
-            </h3>
-            <p className="text-xs sm:text-sm md:text-base lg:text-lg text-gray-400 mb-4 sm:mb-6 md:mb-8 leading-relaxed">
-              {service.description}
-            </p>
-            <Link
-      to={service.route}
-      className={`
-        inline-flex items-center justify-center
-        px-5 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3
-        bg-gradient-to-r from-blue-500/20 to-purple-500/20
-        backdrop-blur-md border border-white/30 rounded-full
-        text-xs sm:text-sm font-medium text-white
-        hover:from-blue-500/30 hover:to-purple-500/30
-        hover:border-white/40 transition-all duration-300
-        hover:scale-105 hover:shadow-lg hover:shadow-blue-500/20
-      `}
-    >
-      {service.buttonText}
-    </Link>
+            <div className="space-y-5">
+              <h3 className="text-4xl xl:text-5xl font-light tracking-tight text-white leading-tight">
+                {service.title}
+              </h3>
+              <p className="text-base text-gray-400 italic">
+                {service.subtitle}
+              </p>
+              <p className="text-base text-gray-300 leading-relaxed">
+                {service.description}
+              </p>
+              <ul className="space-y-2.5 py-2">
+                {service.features.map((feature, idx) => (
+                  <li key={idx} className="flex items-start gap-3 text-sm text-gray-300">
+                    <span className="text-blue-400 mt-1 text-lg">•</span>
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="text-base text-blue-300 font-medium italic pt-2">
+                {service.tagline}
+              </p>
+              <Link className="group inline-flex items-center gap-2 px-8 py-3.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-sm font-medium text-white hover:bg-white/20 hover:border-white/30 transition-all duration-300 hover:gap-3"
+                to={service.route}>
+                {service.buttonText}
+                <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
+            </div>
           </div>
         ))}
       </div>
 
-      {/* Progress Indicator */}
-      <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 flex gap-2 sm:gap-3 z-30">
+      {/* Progress dots */}
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-2.5 z-30">
         {services.map((_, i) => (
           <div
-            key={`progress-${i}`}
-            className={`h-0.5 sm:h-1 rounded-full transition-all duration-500 ${
-              i === currentIndex
-                ? "w-8 sm:w-12 bg-white"
-                : "w-4 sm:w-6 bg-white/30"
+            key={i}
+            className={`h-1.5 rounded-full transition-all duration-500 ${
+              i === currentIndex ? "w-10 bg-white" : "w-1.5 bg-white/30"
             }`}
           />
         ))}
@@ -437,9 +357,3 @@ const ServicesSection = () => {
 };
 
 export default ServicesSection;
-
-
-
-
-
-
