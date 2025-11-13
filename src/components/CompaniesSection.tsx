@@ -1,31 +1,37 @@
+import React from "react";
+
 const CompaniesSection = () => {
-  // Company logos (from /public/companies)
+  // All company logos (14 total)
   const companyLogos = [
-    '/companies/adobe.png',
-    '/companies/anaconda.png',
-    '/companies/broadcom.png',
-    '/companies/cisco.png',
-    '/companies/citrix.png',
-    '/companies/crowdstrike.png',
-    '/companies/ibm.png',
-    '/companies/microsoft.png',
-    '/companies/nutanix.png',
-    '/companies/oracle.png',
-    '/companies/redhat.png',
-    '/companies/salesforce.png',
-    '/companies/sap.png',
-    '/companies/symantec2.png',
-    '/companies/veritas.png',
+    "/companies/adobe2.png",
+    "/companies/anaconda.png",
+    "/companies/broadcom2.png",
+    "/companies/cisco.png",
+    "/companies/citrix2.png",
+    "/companies/crowdstrike.png",
+    "/companies/ibm.png",
+    "/companies/microsoft.png",
+    "/companies/nutanix.png",
+    "/companies/oracle.png",
+    "/companies/redhat.png",
+    "/companies/salesforce.png",
+    "/companies/sap.png",
+    "/companies/symantec2.png",
+    "/companies/veritas.png",
   ];
 
-  // Tool logos (from /public/tools)
+  // Split into two groups: first 7 → row 1, last 7 → row 3
+  const companyGroup1 = companyLogos.slice(0, 7);     // first 7
+  const companyGroup2 = companyLogos.slice(7, 14);    // last 7
+
+  // Tool logos (middle row) – unchanged
   const toolLogos = [
-    '/tools/certero.png',
-    '/tools/flexera.png',
-    '/tools/ilmt.png',
-    '/tools/zylo.png',
-    '/tools/spicework2.png',
-    '/tools/servicenow.png',
+    "/tools/certero.png",
+    "/tools/flexera.png",
+    "/tools/ilmt.png",
+    "/tools/zylo.png",
+    "/tools/spicework2.png",
+    "/tools/servicenow.png",
   ];
 
   return (
@@ -40,51 +46,63 @@ const CompaniesSection = () => {
         </p>
       </div>
 
-      {/* First Row - Company Logos (scroll right) */}
+      {/* First Row – First 7 company logos (scroll right) */}
       <div className="relative mb-8 overflow-hidden">
         <div className="flex animate-scroll-right">
-          {[...companyLogos, ...companyLogos].map((logo, index) => (
+          {[...companyGroup1, ...companyGroup1].map((logo, index) => (
             <div
               key={`row1-${index}`}
               className="flex-shrink-0 mx-8 bg-zinc-900 rounded-xl p-8 border border-zinc-800 hover:border-zinc-700 transition-all duration-300 hover:bg-zinc-800 group"
-              style={{ width: '200px', height: '120px' }}
+              style={{ width: "200px", height: "120px" }}
             >
               <div className="w-full h-full flex items-center justify-center">
-                <img src={logo} alt="Company logo" className="max-w-full max-h-full object-contain" />
+                <img
+                  src={logo}
+                  alt="Company logo"
+                  className="max-w-full max-h-full object-contain"
+                />
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Second Row - Tools Logos (scroll left) */}
+      {/* Second Row – Tools Logos (scroll left) */}
       <div className="relative mb-8 overflow-hidden">
         <div className="flex animate-scroll-left">
           {[...toolLogos, ...toolLogos].map((logo, index) => (
             <div
               key={`row2-${index}`}
               className="flex-shrink-0 mx-8 bg-zinc-900 rounded-xl p-8 border border-zinc-800 hover:border-zinc-700 transition-all duration-300 hover:bg-zinc-800 group"
-              style={{ width: '200px', height: '120px' }}
+              style={{ width: "200px", height: "120px" }}
             >
               <div className="w-full h-full flex items-center justify-center">
-                <img src={logo} alt="Tool logo" className="max-w-full max-h-full object-contain" />
+                <img
+                  src={logo}
+                  alt="Tool logo"
+                  className="max-w-full max-h-full object-contain"
+                />
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Third Row - Company Logos (scroll right slowly) */}
+      {/* Third Row – Last 7 company logos (scroll right slowly) */}
       <div className="relative overflow-hidden">
         <div className="flex animate-scroll-right-slow">
-          {[...companyLogos, ...companyLogos].map((logo, index) => (
+          {[...companyGroup2, ...companyGroup2].map((logo, index) => (
             <div
               key={`row3-${index}`}
               className="flex-shrink-0 mx-8 bg-zinc-900 rounded-xl p-8 border border-zinc-800 hover:border-zinc-700 transition-all duration-300 hover:bg-zinc-800 group"
-              style={{ width: '200px', height: '120px' }}
+              style={{ width: "200px", height: "120px" }}
             >
               <div className="w-full h-full flex items-center justify-center">
-                <img src={logo} alt="Company logo" className="max-w-full max-h-full object-contain" />
+                <img
+                  src={logo}
+                  alt="Company logo"
+                  className="max-w-full max-h-full object-contain"
+                />
               </div>
             </div>
           ))}

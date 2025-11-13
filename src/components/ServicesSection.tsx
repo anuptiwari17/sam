@@ -1,3 +1,4 @@
+/* src/components/ServicesSection.tsx */
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -5,78 +6,152 @@ import { Link } from "react-router-dom";
 
 gsap.registerPlugin(ScrollTrigger);
 
+/* ------------------------------------------------------------------ */
+/*  Service data – unchanged                                          */
+/* ------------------------------------------------------------------ */
 const services = [
   {
     title: "Audit Defense",
     subtitle: "Worried about an upcoming software audit or want to be audit ready?",
-    description: "We help you take control before vendors do. Our audit defense services protect your business from unnecessary risks and penalties.",
+    description:
+      "We help you take control before vendors do. Our audit defense services protect your business from unnecessary risks and penalties.",
     image: "/logo.png",
     buttonText: "Explore Audit Defense",
     features: [
       "Identify compliance gaps before auditors do",
       "Validate and prepare data for accuracy",
       "Negotiate effectively with publishers",
-      "Minimize financial exposure and disruption"
+      "Minimize financial exposure and disruption",
     ],
     tagline: "Stay confident. Stay compliant.",
-    route: "/services/audit-defense"
+    route: "/services/audit-defense",
   },
   {
     title: "Software Managed Services",
     subtitle: "Is managing software compliance taking too much time?",
-    description: "Let us handle it for you. Our managed services give you ongoing control and visibility across your entire software estate.",
+    description:
+      "Let us handle it for you. Our managed services give you ongoing control and visibility across your entire software estate.",
     image: "/logo.png",
     buttonText: "Explore Managed Services",
     features: [
       "Continuous license and entitlement tracking",
       "Automated compliance monitoring",
       "Proactive renewals and vendor management",
-      "Expert support to align software use with business goals"
+      "Expert support to align software use with business goals",
     ],
     tagline: "You focus on your business — we'll manage the rest.",
-    route: "/services/managed-services"
+    route: "/services/managed-services",
   },
   {
     title: "Software License Optimization",
     subtitle: "Are you paying for software you don't fully use?",
-    description: "Most organizations do. We help you optimize licenses, usage, and renewals to unlock hidden savings.",
+    description:
+      "Most organizations do. We help you optimize licenses, usage, and renewals to unlock hidden savings.",
     image: "/logo.png",
     buttonText: "Explore Optimization",
     features: [
       "Analyze actual usage vs. entitlements",
       "Reclaim and reassign underused licenses",
       "Reduce unnecessary costs and compliance risks",
-      "Unlock measurable cost savings without productivity loss"
+      "Unlock measurable cost savings without productivity loss",
     ],
     tagline: "Spend less, achieve more — through smarter license management.",
-    route: "/services/license-optimization"
+    route: "/services/license-optimization",
   },
 ];
 
+/* ------------------------------------------------------------------ */
+/*  ServicesSection component                                         */
+/* ------------------------------------------------------------------ */
 const ServicesSection = () => {
-  const sectionRef = useRef(null);
-  const headerRef = useRef(null);
-  const imageRef = useRef(null);
-  const contentRefs = useRef([]);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const imageRef = useRef<HTMLDivElement>(null);
+  const contentRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
 
+  /* -------------------------------------------------------------- */
+  /*  Mobile detection                                            */
+  /* -------------------------------------------------------------- */
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
   }, []);
 
+  /* -------------------------------------------------------------- */
+  /*  Golden particles + top-left light (unchanged)                */
+  /* -------------------------------------------------------------- */
+  useEffect(() => {
+    if (isMobile || !canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d")!;
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resize();
+
+    const particles: {
+      x: number;
+      y: number;
+      size: number;
+      speedY: number;
+      opacity: number;
+    }[] = [];
+
+    for (let i = 0; i < 70; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 2.4 + 0.8,
+        speedY: Math.random() * 0.5 + 0.15,
+        opacity: Math.random() * 0.16 + 0.06,
+      });
+    }
+
+    let id: number;
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach((p) => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 215, 0, ${p.opacity})`;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = "rgba(255, 215, 0, 0.7)";
+        ctx.fill();
+
+        p.y -= p.speedY;
+        if (p.y < -10) {
+          p.y = canvas.height + 10;
+          p.x = Math.random() * canvas.width;
+        }
+      });
+      id = requestAnimationFrame(animate);
+    };
+    animate();
+
+    window.addEventListener("resize", resize);
+    return () => {
+      cancelAnimationFrame(id);
+      window.removeEventListener("resize", resize);
+    };
+  }, [isMobile]);
+
+  /* -------------------------------------------------------------- */
+  /*  GSAP ScrollTrigger – unchanged                              */
+  /* -------------------------------------------------------------- */
   useEffect(() => {
     if (isMobile) return;
-
     const section = sectionRef.current;
     if (!section) return;
 
     const ctx = gsap.context(() => {
       gsap.set(contentRefs.current, { opacity: 0, x: -60 });
-      
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: section,
@@ -88,152 +163,117 @@ const ServicesSection = () => {
         },
       });
 
-      // Phase 1: Fade out header, move and enlarge image to right
-      tl.to(headerRef.current, {
-        opacity: 0,
-        y: -40,
-        duration: 1.2,
-        ease: "power2.inOut"
-      })
-      .to(imageRef.current, {
-        left: "73%",
-        top: "50%",
-        scale: 1,
-        width: "38vw",
-        height: "68vh",
-        duration: 2,
-        ease: "power3.inOut",
-        onStart: () => setCurrentIndex(0)
-      }, "-=0.6")
-      .to(contentRefs.current[0], {
-        opacity: 1,
-        x: 0,
-        duration: 1.5,
-        ease: "power2.out"
-      }, "-=1.2");
+      tl.to(headerRef.current, { opacity: 0, y: -40, duration: 1.2, ease: "power2.inOut" })
+        .to(
+          imageRef.current,
+          {
+            left: "73%",
+            top: "50%",
+            scale: 1,
+            width: "38vw",
+            height: "68vh",
+            duration: 2,
+            ease: "power3.inOut",
+            onStart: () => setCurrentIndex(0),
+          },
+          "-=0.6"
+        )
+        .to(
+          contentRefs.current[0],
+          { opacity: 1, x: 0, duration: 1.5, ease: "power2.out" },
+          "-=1.2"
+        );
 
-      // Hold first service
       tl.to({}, { duration: 1.5 });
 
-      // Phase 2: Transition to second service
-      tl.to(contentRefs.current[0], {
-        opacity: 0,
-        x: -60,
-        duration: 1,
-        ease: "power2.in"
-      })
-      .to(imageRef.current, {
-        opacity: 0,
-        scale: 0.95,
-        duration: 0.6,
-        ease: "power2.inOut",
-        onComplete: () => {
-          setCurrentIndex(1);
-        }
-      }, "<")
-      .to(imageRef.current, {
-        opacity: 1,
-        scale: 1,
-        duration: 0.6,
-        ease: "power2.inOut"
-      })
-      .to(contentRefs.current[1], {
-        opacity: 1,
-        x: 0,
-        duration: 1.5,
-        ease: "power2.out"
-      }, "-=0.8");
+      tl.to(contentRefs.current[0], { opacity: 0, x: -60, duration: 1.5, ease: "power2.in" })
+        .to(
+          imageRef.current,
+          {
+            opacity: 0,
+            scale: 0.95,
+            duration: 0.6,
+            ease: "power2.inOut",
+            onComplete: () => setCurrentIndex(1),
+          },
+          "<"
+        )
+        .to(imageRef.current, { opacity: 1, scale: 1, duration: 0.6, ease: "power2.inOut" })
+        .to(
+          contentRefs.current[1],
+          { opacity: 1, x: 0, duration: 1.5, ease: "power2.out" },
+          "-=0.8"
+        );
 
-      // Hold second service
       tl.to({}, { duration: 1.5 });
 
-      // Phase 3: Transition to third service
-      tl.to(contentRefs.current[1], {
-        opacity: 0,
-        x: -60,
-        duration: 1,
-        ease: "power2.in"
-      })
-      .to(imageRef.current, {
-        opacity: 0,
-        scale: 0.95,
-        duration: 0.6,
-        ease: "power2.inOut",
-        onComplete: () => {
-          setCurrentIndex(2);
-        }
-      }, "<")
-      .to(imageRef.current, {
-        opacity: 1,
-        scale: 1,
-        duration: 0.6,
-        ease: "power2.inOut"
-      })
-      .to(contentRefs.current[2], {
-        opacity: 1,
-        x: 0,
-        duration: 1.5,
-        ease: "power2.out"
-      }, "-=0.8");
+      tl.to(contentRefs.current[1], { opacity: 0, x: -60, duration: 1.5, ease: "power2.in" })
+        .to(
+          imageRef.current,
+          {
+            opacity: 0,
+            scale: 0.95,
+            duration: 0.6,
+            ease: "power2.inOut",
+            onComplete: () => setCurrentIndex(2),
+          },
+          "<"
+        )
+        .to(imageRef.current, { opacity: 1, scale: 1, duration: 0.6, ease: "power2.inOut" })
+        .to(
+          contentRefs.current[2],
+          { opacity: 1, x: 0, duration: 1.5, ease: "power2.out" },
+          "-=0.8"
+        );
 
-      // Final hold
       tl.to({}, { duration: 1.5 });
-
     }, section);
 
     return () => ctx.revert();
   }, [isMobile]);
 
-  // Mobile version
+  /* -------------------------------------------------------------- */
+  /*  Mobile layout – polished & clean                            */
+  /* -------------------------------------------------------------- */
   if (isMobile) {
     return (
-      <section className="w-full bg-[#0a0e1a] py-16 px-4" style={{zIndex: 10}}>
+      <section className="w-full bg-[#0a0e1a] py-16 px-4 font-inter" style={{ zIndex: 10 }}>
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-light tracking-tight text-white mb-2">
-            Our Services
-          </h2>
-          <p className="text-sm text-gray-400">
-            Explore our services
-          </p>
+          <h2 className="text-4xl font-medium text-white tracking-tight">Our Services</h2>
+          <p className="mt-2 text-sm text-gray-400">Explore our solutions</p>
         </div>
 
-        
-        <div className="space-y-6">
-          {services.map((service, i) => (
-            <div key={i} className="bg-gradient-to-br from-[#0f1629] to-[#0a0e1a] rounded-2xl overflow-hidden border border-white/10">
-              <div className="h-56 overflow-hidden bg-[#0d1520] flex items-center justify-center p-8 ">
-                <img
-                  src={service.image}
-                  alt={service.title}
-                  className="w-full h-full object-contain"
-                />
+        <div className="space-y-8">
+          {services.map((s, i) => (
+            <div
+              key={i}
+              className="bg-gradient-to-br from-[#111827]/80 to-[#0a0e1a] backdrop-blur-sm rounded-2xl border border-white/10 p-6"
+            >
+              <div className="mb-5 h-48 bg-[#0d1520] rounded-xl flex items-center justify-center overflow-hidden">
+                <img src={s.image} alt={s.title} className="h-full w-auto object-contain p-6" />
               </div>
-              <div className="p-6">
-                <h3 className="text-xl font-light text-white mb-2">
-                  {service.title}
-                </h3>
-                <p className="text-xs text-gray-400 mb-3 italic">
-                  {service.subtitle}
-                </p>
-                <p className="text-sm text-gray-300 mb-4 leading-relaxed">
-                  {service.description}
-                </p>
-                <ul className="space-y-2 mb-4">
-                  {service.features.map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-xs text-gray-400">
-                      <span className="text-blue-400 mt-1">•</span>
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <p className="text-sm text-blue-300 font-medium mb-5 italic">
-                  {service.tagline}
-                </p>
-                <Link className="w-full px-6 py-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-sm font-medium text-white hover:bg-white/20 transition-all"
-                  to={service.route}>
-                  {service.buttonText}
-                </Link>
-              </div>
+
+              <h3 className="text-xl font-semibold text-white mb-1">{s.title}</h3>
+              <p className="text-xs text-amber-300 italic mb-3">{s.subtitle}</p>
+              <p className="text-sm text-gray-300 leading-relaxed mb-4">{s.description}</p>
+
+              <ul className="space-y-2 mb-5">
+                {s.features.map((f, idx) => (
+                  <li key={idx} className="flex items-start gap-2 text-xs text-gray-400">
+                    <span className="text-amber-400 mt-0.5">•</span>
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <p className="text-sm font-medium text-amber-300 italic mb-5">{s.tagline}</p>
+
+              <Link
+                to={s.route}
+                className="block w-full text-center py-3 px-6 bg-gradient-to-r from-amber-500 to-amber-400 text-gray-900 font-medium rounded-full shadow-lg hover:shadow-amber-400/30 transition-all duration-300"
+              >
+                {s.buttonText}
+              </Link>
             </div>
           ))}
         </div>
@@ -241,17 +281,68 @@ const ServicesSection = () => {
     );
   }
 
-  // Desktop version
+  /* -------------------------------------------------------------- */
+  /*  Desktop layout – clean, professional, cheerful              */
+  /* -------------------------------------------------------------- */
   return (
     <section
       ref={sectionRef}
-      className="relative h-screen w-full bg-[#0a0e1a] overflow-hidden"
+      className="relative h-screen w-full bg-[#0a0e1a] overflow-hidden font-inter"
       style={{ zIndex: 10 }}
     >
-      {/* Subtle background effect */}
+      {/* ==== Golden particles ==== */}
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 pointer-events-none"
+        style={{ mixBlendMode: "screen" }}
+      />
+
+      {/* ==== Top-left golden light ==== */}
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
+        <div
+          className="absolute top-0 left-0 w-[600px] h-[600px] rounded-full blur-3xl opacity-20"
+          style={{
+            background:
+              "radial-gradient(circle at 0% 0%, rgba(255, 215, 0, 0.18) 0%, transparent 70%)",
+            transform: "translate(-30%, -30%)",
+          }}
+        />
+      </div>
+
+      {/* ==== Golden nebulae ==== */}
+      <div className="absolute inset-0 pointer-events-none opacity-40">
+        <div
+          className="absolute w-[700px] h-[700px] rounded-full blur-3xl"
+          style={{
+            top: "5%",
+            left: "-15%",
+            background:
+              "radial-gradient(circle, rgba(255, 193, 0, 0.14) 0%, transparent 70%)",
+          }}
+        />
+        <div
+          className="absolute w-[900px] h-[900px] rounded-full blur-3xl"
+          style={{
+            bottom: "-25%",
+            right: "-20%",
+            background:
+              "radial-gradient(circle, rgba(255, 223, 0, 0.12) 0%, transparent 70%)",
+          }}
+        />
+        <div
+          className="absolute w-[600px] h-[600px] rounded-full blur-3xl"
+          style={{
+            top: "45%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            background:
+              "radial-gradient(circle, rgba(255, 215, 0, 0.10) 0%, transparent 65%)",
+          }}
+        />
+      </div>
+
+      {/* ==== Subtle gradient & stars ==== */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-950/20 via-transparent to-purple-950/20" />
-      
-      {/* Subtle stars */}
       <div className="absolute inset-0 opacity-30">
         {[...Array(60)].map((_, i) => (
           <div
@@ -266,74 +357,77 @@ const ServicesSection = () => {
         ))}
       </div>
 
-      {/* Header - Initial centered state */}
+      {/* ==== Header ==== */}
       <div
         ref={headerRef}
         className="absolute top-[15%] left-1/2 -translate-x-1/2 text-center z-20"
       >
-        <h2 className="text-6xl xl:text-7xl font-light tracking-tight text-white mb-3">
+        <h2 className="text-6xl xl:text-7xl font-medium text-white tracking-tight">
           Our Services
         </h2>
-        <div className="flex items-center justify-center gap-3">
-          <div className="h-px w-12 bg-gradient-to-r from-transparent to-white/40" />
-          <p className="text-sm text-gray-400 tracking-wide">
-            Explore our services
-          </p>
-          <div className="h-px w-12 bg-gradient-to-l from-transparent to-white/40" />
-        </div>
+        <p className="mt-3 text-sm text-gray-400 tracking-wide">Explore our solutions</p>
       </div>
 
-      {/* Image - Starts center, zoomed out */}
+      {/* ==== Image ==== */}
       <div
         ref={imageRef}
         className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[35vw] h-[50vh] z-10 mt-8"
-        style={{ scale: 0.7, willChange: 'transform, left, top, width, height' }}
+        style={{ scale: 0.7, willChange: "transform, left, top, width, height" }}
       >
         <div className="relative w-full h-full rounded-3xl overflow-hidden shadow-2xl bg-[#0d1520] flex items-center justify-center p-12">
           <img
-            src={services[0].image}
-            alt="Service"
+            src={services[currentIndex].image}
+            alt={services[currentIndex].title}
             className="w-full h-full object-contain"
           />
           <div className="absolute inset-0 rounded-3xl border border-white/20" />
         </div>
       </div>
 
-      {/* Content - Left side */}
+      {/* ==== Content ==== */}
       <div className="absolute left-[6%] top-[20%] -translate-y-1/2 w-[44%] z-20">
-        {services.map((service, i) => (
+        {services.map((s, i) => (
           <div
             key={i}
             ref={(el) => (contentRefs.current[i] = el)}
             className="absolute w-full"
-            style={{ pointerEvents: currentIndex === i ? 'auto' : 'none' }}
+            style={{ pointerEvents: currentIndex === i ? "auto" : "none" }}
           >
-            <div className="space-y-5">
-              <h3 className="text-4xl xl:text-5xl font-light tracking-tight text-white leading-tight">
-                {service.title}
+            <div className="space-y-5 max-w-xl">
+              <h3 className="text-5xl xl:text-6xl font-semibold text-white leading-tight">
+                {s.title}
               </h3>
-              <p className="text-base text-gray-400 italic">
-                {service.subtitle}
-              </p>
-              <p className="text-base text-gray-300 leading-relaxed">
-                {service.description}
-              </p>
-              <ul className="space-y-2.5 py-2">
-                {service.features.map((feature, idx) => (
+              <p className="text-base text-amber-300 italic">{s.subtitle}</p>
+              <p className="text-base text-gray-300 leading-relaxed">{s.description}</p>
+
+              <ul className="space-y-3">
+                {s.features.map((f, idx) => (
                   <li key={idx} className="flex items-start gap-3 text-sm text-gray-300">
-                    <span className="text-blue-400 mt-1 text-lg">•</span>
-                    <span>{feature}</span>
+                    <span className="text-amber-400 mt-1">•</span>
+                    <span>{f}</span>
                   </li>
                 ))}
               </ul>
-              <p className="text-base text-blue-300 font-medium italic pt-2">
-                {service.tagline}
-              </p>
-              <Link className="group inline-flex items-center gap-2 px-8 py-3.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-full text-sm font-medium text-white hover:bg-white/20 hover:border-white/30 transition-all duration-300 hover:gap-3"
-                to={service.route}>
-                {service.buttonText}
-                <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+
+              <p className="text-base font-medium text-amber-300 italic">{s.tagline}</p>
+
+              <Link
+                to={s.route}
+                className="group inline-flex items-center gap-3 px-8 py-3.5 bg-gradient-to-r from-amber-500 to-amber-400 text-gray-900 font-medium rounded-full shadow-lg hover:shadow-amber-400/40 transition-all duration-300 hover:gap-4"
+              >
+                {s.buttonText}
+                <svg
+                  className="w-4 h-4 transition-transform group-hover:translate-x-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                  />
                 </svg>
               </Link>
             </div>
@@ -341,13 +435,13 @@ const ServicesSection = () => {
         ))}
       </div>
 
-      {/* Progress dots */}
-      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-2.5 z-30">
+      {/* ==== Progress dots ==== */}
+      <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-3 z-30">
         {services.map((_, i) => (
           <div
             key={i}
             className={`h-1.5 rounded-full transition-all duration-500 ${
-              i === currentIndex ? "w-10 bg-white" : "w-1.5 bg-white/30"
+              i === currentIndex ? "w-12 bg-amber-400" : "w-1.5 bg-white/30"
             }`}
           />
         ))}
